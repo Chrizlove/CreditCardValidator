@@ -73,7 +73,8 @@ class MainActivity : AppCompatActivity() {
             cardSecondNameText.helperText = "Lastname is required"
         }
         else{
-            if(!validateName(cardSecondNameEditText.text.toString()))
+            //name validation
+            if(!NameValidator.validateName(cardSecondNameEditText.text.toString()))
             {
                 cardLastnameValid=true
                 cardSecondNameText.helperText = ""
@@ -90,7 +91,8 @@ class MainActivity : AppCompatActivity() {
             cardFirstNameNumberText.helperText = "Firstname is required"
         }
         else{
-            if(!validateName(cardFirstNameNumberEditText.text.toString()))
+            //name validation
+            if(!NameValidator.validateName(cardFirstNameNumberEditText.text.toString()))
             {
                 cardFirstnameValid=true
                 cardFirstNameNumberText.helperText = ""
@@ -111,7 +113,8 @@ class MainActivity : AppCompatActivity() {
             cardExpiryNumberText.helperText = "Expiry is invalid"
         }
         else{
-            if(expiryValidator())
+            //expiry validation
+            if(ExpiryCreditCardValidator.expiryValidator(cardExpiryNumberEditText.text.toString()))
             {
                 cardExpiryNumberText.helperText = ""
                 cardExpiryValid=true
@@ -157,6 +160,7 @@ class MainActivity : AppCompatActivity() {
             cardNumberText.helperText = "Card number is required"
         }
         else{
+
             //luhn validation for the credit card number
              if(LuhnCreditCardValidator.creditCardLuhnValidation(cardNumberEditText.text.toString()) && cardNumberTypeValid)
             {
@@ -169,31 +173,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun validateName(name: String): Boolean {
-        val patternName = Pattern.compile("[^a-z ]",Pattern.CASE_INSENSITIVE)
-        val matcher = patternName.matcher(name)
-        return matcher.find()
-    }
-
-    private fun expiryValidator(): Boolean {
-
-        val calender = Calendar.getInstance()
-        val currentMonth = calender.get(Calendar.MONTH)
-        val currentYear = calender.get(Calendar.YEAR)
-        val expiry = cardExpiryNumberEditText.text.toString()
-        val month = "${expiry.get(0)}${expiry.get(1)}".toInt()
-        val year = "20${expiry.get(3)}${expiry.get(4)}".toInt()
-        if(year < currentYear)
-        {
-            cardExpiryNumberText.helperText = "Card is expired"
-            return false
-        }
-        if(month < currentMonth && year == currentYear){
-             cardExpiryNumberText.helperText = "Card is expired"
-             return false
-        }
-        return true
-    }
 
     private fun createAlert() {
     val alertDialog = AlertDialog.Builder(this).setTitle("Payment Successful")
