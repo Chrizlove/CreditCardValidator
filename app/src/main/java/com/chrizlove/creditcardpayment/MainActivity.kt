@@ -10,6 +10,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doOnTextChanged
 import kotlinx.android.synthetic.main.activity_main.*
 import java.util.*
+import java.util.regex.Pattern
 
 class MainActivity : AppCompatActivity() {
     private var cardNumberTypeValid=false
@@ -82,24 +83,36 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            //card expiry empty handler
+            //card firstname empty handler
             if(cardFirstNameNumberEditText.text.isNullOrBlank())
             {
                 cardFirstNameNumberText.helperText = "Firstname is required"
             }
             else{
-                cardFirstnameValid=true
-                cardFirstNameNumberText.helperText = ""
+                if(!validateName(cardFirstNameNumberEditText.text.toString()))
+                {
+                    cardFirstnameValid=true
+                    cardFirstNameNumberText.helperText = ""
+                }
+                else{
+                    cardFirstNameNumberText.helperText = "Special characters not allowed!"
+                }
             }
 
-            //card expiry empty handler
+            //card lastname empty handler
             if(cardSecondNameEditText.text.isNullOrBlank())
             {
                 cardSecondNameText.helperText = "Lastname is required"
             }
             else{
-                cardLastnameValid=true
-                cardSecondNameText.helperText = ""
+                if(!validateName(cardSecondNameEditText.text.toString()))
+                {
+                    cardLastnameValid=true
+                    cardSecondNameText.helperText = ""
+                }
+                else{
+                    cardSecondNameText.helperText = "Special characters not allowed!"
+                }
             }
 
             if(cardNumberValid && cardExpiryValid && cardCVVValid && cardFirstnameValid && cardLastnameValid)
@@ -110,12 +123,33 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun validateName(name: String): Boolean {
+        val patternName = Pattern.compile("[^a-z0-9 ]",Pattern.CASE_INSENSITIVE)
+        val matcher = patternName.matcher(name)
+        return matcher.find()
+    }
+
     private fun expiryValidator(): Boolean {
     val calender = Calendar.getInstance()
+        val currentMonth = calender.get(Calendar.MONTH)
+        val currentYear = calender.get(Calendar.YEAR)
         val expiry = cardExpiryNumberEditText.text.toString()
-        val month = "${expiry.get(0)}${expiry.get(1)}"
-        val year = "${expiry.get(3)}${expiry.get(4)}"
-        return false
+        val month = "${expiry.get(0)}${expiry.get(1)}".toInt()
+        val year = "20${expiry.get(3)}${expiry.get(4)}".toInt()
+        Log.d("month",month.toString())
+        Log.d("currentmonth",currentMonth.toString())
+        Log.d("year",year.toString())
+        Log.d("currentyear",currentYear.toString())
+        if(year < currentYear)
+        {
+            cardExpiryNumberText.helperText = "Card is expired"
+            return false
+        }
+          if(month < currentMonth && year >= currentYear){
+             cardExpiryNumberText.helperText = "Card is expired"
+             return false
+        }
+        return true
     }
 
     private fun createAlert() {
@@ -158,6 +192,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun cardExpiryHandler() {
         cardExpiryNumberEditText.doOnTextChanged { text, start, before, count ->
+            //code for / handler
             if(start==1 && count ==1)
             {
                 cardExpiryNumberEditText.setText("${text}/")
@@ -167,9 +202,60 @@ class MainActivity : AppCompatActivity() {
             {
                 val string = text.toString()
                 val char1 = string.get(0)
-                val char2 = string.get(1)
-                cardExpiryNumberEditText.setText("${char1}${char2}")
-                cardExpiryNumberEditText.setSelection(2)
+                if(char1.digitToInt() == 0)
+                {
+                    cardExpiryNumberEditText.setText("")
+                    cardExpiryNumberEditText.setSelection(0)
+                }
+                else{
+                    cardExpiryNumberEditText.setText("${char1}")
+                    cardExpiryNumberEditText.setSelection(1)
+                }
+            }
+            else if(start==2 && count==0)
+            {
+                val string = text.toString()
+                val char1 = string.get(0)
+                if(char1.digitToInt() == 0)
+                {
+                    cardExpiryNumberEditText.setText("")
+                    cardExpiryNumberEditText.setSelection(0)
+                }
+                else{
+                    cardExpiryNumberEditText.setText("${char1}")
+                    cardExpiryNumberEditText.setSelection(1)
+                }
+            }
+            //code of input handler
+            if(count==1 && start ==0)
+            {
+                val string = text.toString()
+                if(string.get(0).digitToInt()!=0 && string.get(0).digitToInt() >=2)
+                {
+                    cardExpiryNumberEditText.setText("0${text}/")
+                    cardExpiryNumberEditText.setSelection(3)
+                }
+            }
+
+            //code for 0 month handler
+            if(count==1 && start ==0)
+            {
+                val string = text.toString()
+                if(string.get(0).digitToInt()==0)
+                {
+                    cardExpiryNumberEditText.setText("")
+                    cardExpiryNumberEditText.setSelection(0)
+                }
+            }
+            //code for month above 12 handler
+            if(count==1 && start==1)
+            {
+                val string = text.toString()
+                if(string.get(1).digitToInt()>=3)
+                {
+                    cardExpiryNumberEditText.setText("${string.get(0)}")
+                    cardExpiryNumberEditText.setSelection(1)
+                }
             }
         }
     }
