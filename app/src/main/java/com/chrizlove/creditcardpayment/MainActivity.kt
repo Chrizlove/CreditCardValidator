@@ -19,7 +19,9 @@ class MainActivity : AppCompatActivity() {
     private var cardCVVValid = false
     private var cardFirstnameValid = false
     private var cardLastnameValid = false
+    private var cardType="none"
     private val listOfPattern = arrayListOf<String>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,81 +42,22 @@ class MainActivity : AppCompatActivity() {
     private fun onSubmit() {
         submitButton.setOnClickListener {
 
-            //card number empty handler
-            if(cardNumberEditText.text.isNullOrBlank())
-            {
-                cardNumberText.helperText = "Card number is required"
-            }
-            else{
-                //luhn validation for the credit card number
-                if(creditCardLuhnValidation(cardNumberEditText.text.toString()) && cardNumberTypeValid)
-                {
-                    cardNumberValid = true
-                    cardNumberText.helperText = ""
-                }
-                else{
-                    cardNumberText.helperText = "Card number is invalid"
-                }
-            }
+            //card number on submit handler and validation
+            cardNumberOnSubmitHandler()
 
-            //card cvv validation
-            if(cardCVVNumberEditText.text?.length ==3)
-            {
-                cardCVVValid=true
-                cardCVVNumberText.helperText = ""
-            }
-            else{
-                cardCVVNumberText.helperText = "CVV is invalid"
-            }
+            //card cvv on submit validation
+            cardCVVOnSubmitHandler()
 
-            //card expiry empty handler
-            if(cardExpiryNumberEditText.text.isNullOrBlank())
-            {
-                cardExpiryNumberText.helperText = "Expiry is required"
-            }
-            else{
-                if(expiryValidator())
-                {
-                    cardExpiryNumberText.helperText = ""
-                    cardExpiryValid=true
-                }
-                else {
-                    cardExpiryNumberText.helperText = "Card is expired"
-                }
-            }
+            //card expiry on submit handler and validation
+            cardExpiryOnSubmitHandler()
 
-            //card firstname empty handler
-            if(cardFirstNameNumberEditText.text.isNullOrBlank())
-            {
-                cardFirstNameNumberText.helperText = "Firstname is required"
-            }
-            else{
-                if(!validateName(cardFirstNameNumberEditText.text.toString()))
-                {
-                    cardFirstnameValid=true
-                    cardFirstNameNumberText.helperText = ""
-                }
-                else{
-                    cardFirstNameNumberText.helperText = "Special characters not allowed!"
-                }
-            }
+            //firstname on submit handler and validation
+            cardFirstnameOnSubmitHandler()
 
-            //card lastname empty handler
-            if(cardSecondNameEditText.text.isNullOrBlank())
-            {
-                cardSecondNameText.helperText = "Lastname is required"
-            }
-            else{
-                if(!validateName(cardSecondNameEditText.text.toString()))
-                {
-                    cardLastnameValid=true
-                    cardSecondNameText.helperText = ""
-                }
-                else{
-                    cardSecondNameText.helperText = "Special characters not allowed!"
-                }
-            }
+            //lastname on submit handler and validation
+            cardLastnameOnSubmitHandler()
 
+            //final check for all above validation
             if(cardNumberValid && cardExpiryValid && cardCVVValid && cardFirstnameValid && cardLastnameValid)
             {
                     //create a alert for successful payment
@@ -123,29 +66,130 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun cardLastnameOnSubmitHandler() {
+
+        if(cardSecondNameEditText.text.isNullOrBlank())
+        {
+            cardSecondNameText.helperText = "Lastname is required"
+        }
+        else{
+            if(!validateName(cardSecondNameEditText.text.toString()))
+            {
+                cardLastnameValid=true
+                cardSecondNameText.helperText = ""
+            }
+            else{
+                cardSecondNameText.helperText = "Only alphabet and spaces allowed!"
+            }
+        }
+    }
+
+    private fun cardFirstnameOnSubmitHandler() {
+        if(cardFirstNameNumberEditText.text.isNullOrBlank())
+        {
+            cardFirstNameNumberText.helperText = "Firstname is required"
+        }
+        else{
+            if(!validateName(cardFirstNameNumberEditText.text.toString()))
+            {
+                cardFirstnameValid=true
+                cardFirstNameNumberText.helperText = ""
+            }
+            else{
+                cardFirstNameNumberText.helperText = "Only alphabet and spaces allowed!"
+            }
+        }
+    }
+
+    private fun cardExpiryOnSubmitHandler() {
+        if(cardExpiryNumberEditText.text.isNullOrBlank())
+        {
+            cardExpiryNumberText.helperText = "Expiry is required"
+        }
+        else if(cardExpiryNumberEditText.text!!.length !=5)
+        {
+            cardExpiryNumberText.helperText = "Expiry is invalid"
+        }
+        else{
+            if(expiryValidator())
+            {
+                cardExpiryNumberText.helperText = ""
+                cardExpiryValid=true
+            }
+            else {
+                cardExpiryNumberText.helperText = "Card is expired"
+            }
+        }
+    }
+
+    private fun cardCVVOnSubmitHandler() {
+        if(cardType=="none")
+        {
+            cardCVVNumberText.helperText = "Enter valid card number"
+        }
+        else if(cardType!="americanexp")
+        {
+            if(cardCVVNumberEditText.text?.length ==3)
+            {
+                cardCVVValid=true
+                cardCVVNumberText.helperText = ""
+            }
+            else{
+                cardCVVNumberText.helperText = "CVV is invalid"
+            }
+        }
+        else{
+            if(cardCVVNumberEditText.text?.length ==4)
+            {
+                cardCVVValid=true
+                cardCVVNumberText.helperText = ""
+            }
+            else{
+                cardCVVNumberText.helperText = "CVV is invalid"
+            }
+        }
+    }
+
+    private fun cardNumberOnSubmitHandler() {
+
+        if(cardNumberEditText.text.isNullOrBlank())
+        {
+            cardNumberText.helperText = "Card number is required"
+        }
+        else{
+
+            //luhn validation for the credit card number
+            if(creditCardLuhnValidation(cardNumberEditText.text.toString()) && cardNumberTypeValid)
+            {
+                cardNumberValid = true
+                cardNumberText.helperText = ""
+            }
+            else{
+                cardNumberText.helperText = "Card number is invalid"
+            }
+        }
+    }
+
     private fun validateName(name: String): Boolean {
-        val patternName = Pattern.compile("[^a-z0-9 ]",Pattern.CASE_INSENSITIVE)
+        val patternName = Pattern.compile("[^a-z ]",Pattern.CASE_INSENSITIVE)
         val matcher = patternName.matcher(name)
         return matcher.find()
     }
 
     private fun expiryValidator(): Boolean {
-    val calender = Calendar.getInstance()
+        
+        val calender = Calendar.getInstance()
         val currentMonth = calender.get(Calendar.MONTH)
         val currentYear = calender.get(Calendar.YEAR)
         val expiry = cardExpiryNumberEditText.text.toString()
         val month = "${expiry.get(0)}${expiry.get(1)}".toInt()
         val year = "20${expiry.get(3)}${expiry.get(4)}".toInt()
-        Log.d("month",month.toString())
-        Log.d("currentmonth",currentMonth.toString())
-        Log.d("year",year.toString())
-        Log.d("currentyear",currentYear.toString())
         if(year < currentYear)
         {
             cardExpiryNumberText.helperText = "Card is expired"
             return false
         }
-          if(month < currentMonth && year >= currentYear){
+        if(month < currentMonth && year == currentYear){
              cardExpiryNumberText.helperText = "Card is expired"
              return false
         }
@@ -191,6 +235,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun cardExpiryHandler() {
+
         cardExpiryNumberEditText.doOnTextChanged { text, start, before, count ->
             //code for / handler
             if(start==1 && count ==1)
@@ -198,6 +243,7 @@ class MainActivity : AppCompatActivity() {
                 cardExpiryNumberEditText.setText("${text}/")
                 cardExpiryNumberEditText.setSelection(3)
             }
+
             else if(start==3 && count==0)
             {
                 val string = text.toString()
@@ -212,6 +258,7 @@ class MainActivity : AppCompatActivity() {
                     cardExpiryNumberEditText.setSelection(1)
                 }
             }
+
             else if(start==2 && count==0)
             {
                 val string = text.toString()
@@ -226,6 +273,7 @@ class MainActivity : AppCompatActivity() {
                     cardExpiryNumberEditText.setSelection(1)
                 }
             }
+
             //code of input handler
             if(count==1 && start ==0)
             {
@@ -247,6 +295,7 @@ class MainActivity : AppCompatActivity() {
                     cardExpiryNumberEditText.setSelection(0)
                 }
             }
+
             //code for month above 12 handler
             if(count==1 && start==1)
             {
@@ -263,33 +312,34 @@ class MainActivity : AppCompatActivity() {
     private fun cardNumberHandler() {
         cardNumberEditText.doOnTextChanged { text, start, before, count ->
             val cardNumberString = text.toString()
+
             for(exp in listOfPattern)
             {
                 if(cardNumberString.matches(exp.toRegex()))
                 {
                     if(exp == "^4[0-9]{6,}$")
                     {
-                        Log.d("cardtype","visa")
                         cardTypeImage.setImageDrawable(getDrawable(R.drawable.visalogo))
+                        cardType="visa"
                     }
                     else if(exp == "^5[1-5][0-9]{5,}$"){
-                        Log.d("cardtype","master")
                         cardTypeImage.setImageDrawable(getDrawable(R.drawable.mastercardlogo))
+                        cardType="mastercard"
                     }
                     else if(exp == "^3[47][0-9]{5,}$"){
-                        Log.d("cardtype","amexp")
                         cardTypeImage.setImageDrawable(getDrawable(R.drawable.americanexpresslogo))
+                        cardType="americanexp"
                     }
                     else if(exp == "^6(?:011|5[0-9]{2})[0-9]{3,}$"){
-                        Log.d("cardtype","discover")
                         cardTypeImage.setImageDrawable(getDrawable(R.drawable.discoverlogo))
+                        cardType="discover"
                     }
                     cardNumberTypeValid=true
                     break
                 }
                 else{
                     cardNumberTypeValid = false
-                    Log.d("cardtype","none")
+                    cardType="none"
                     cardTypeImage.setImageDrawable(getDrawable(R.drawable.ic_baseline_credit_card_24))
                 }
             }
