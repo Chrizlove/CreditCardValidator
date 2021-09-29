@@ -157,9 +157,8 @@ class MainActivity : AppCompatActivity() {
             cardNumberText.helperText = "Card number is required"
         }
         else{
-
             //luhn validation for the credit card number
-            if(creditCardLuhnValidation(cardNumberEditText.text.toString()) && cardNumberTypeValid)
+             if(LuhnCreditCardValidator.creditCardLuhnValidation(cardNumberEditText.text.toString()) && cardNumberTypeValid)
             {
                 cardNumberValid = true
                 cardNumberText.helperText = ""
@@ -177,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun expiryValidator(): Boolean {
-        
+
         val calender = Calendar.getInstance()
         val currentMonth = calender.get(Calendar.MONTH)
         val currentYear = calender.get(Calendar.YEAR)
@@ -204,23 +203,6 @@ class MainActivity : AppCompatActivity() {
                                         }
                                     }).create()
         alertDialog.show()
-    }
-
-    private fun creditCardLuhnValidation(cardNumber: String) : Boolean {
-        val (digits, others) = cardNumber
-            .filterNot(Char::isWhitespace)
-            .partition(Char::isDigit)
-        if (digits.length <= 1 || others.isNotEmpty()) {
-            return false
-        }
-        val checksum = digits
-            .map { it.toInt() - '0'.toInt() }
-            .reversed()
-            .mapIndexed { index, value ->
-                if (index % 2 == 1 && value < 9) value * 2 % 9 else value
-            }
-            .sum()
-        return checksum % 10 == 0
     }
 
     private fun addValidationPatterns() {
