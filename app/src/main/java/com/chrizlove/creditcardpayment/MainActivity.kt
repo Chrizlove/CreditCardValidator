@@ -114,13 +114,17 @@ class MainActivity : AppCompatActivity() {
         }
         else{
             //expiry validation
-            if(ExpiryCreditCardValidator.expiryValidator(cardExpiryNumberEditText.text.toString()))
+                val expiryResult = ExpiryCreditCardValidator.expiryValidator(cardExpiryNumberEditText.text.toString())
+            if(expiryResult==2)
             {
                 cardExpiryNumberText.helperText = ""
                 cardExpiryValid=true
             }
-            else {
+            else if(expiryResult==1){
                 cardExpiryNumberText.helperText = "Card is expired"
+            }
+            else {
+                cardExpiryNumberText.helperText = "Expiry is invalid"
             }
         }
     }
@@ -263,8 +267,11 @@ class MainActivity : AppCompatActivity() {
                 val string = text.toString()
                 if(string.get(1).digitToInt()>=3)
                 {
-                    cardExpiryNumberEditText.setText("${string.get(0)}")
-                    cardExpiryNumberEditText.setSelection(1)
+                    if(string.get(0).digitToInt()!=0)
+                    {
+                        cardExpiryNumberEditText.setText("${string.get(0)}")
+                        cardExpiryNumberEditText.setSelection(1)
+                    }
                 }
             }
         }
